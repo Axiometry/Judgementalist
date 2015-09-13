@@ -1,0 +1,5 @@
+rootProject.name = 'judgementalist'
+
+include 'judgementalist-api'
+include 'judgementalist-judge'
+include 'judgementalist-sql'
