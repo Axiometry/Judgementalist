@@ -6,7 +6,7 @@ trait Judge extends Actor
 
 object Judge {
   sealed trait Request
-  object Requests {
+  object Request {
     case class Submit(participantId: String,
                       problemId: String,
                       contestId: String = null,
@@ -17,7 +17,7 @@ object Judge {
   }
 
   sealed trait Response
-  object Responses {
+  object Response {
     case class Submit(id: Long) extends Response
     case class SubmitFailure(reason: SubmitFailure.Reason) extends Response
     object SubmitFailure {
