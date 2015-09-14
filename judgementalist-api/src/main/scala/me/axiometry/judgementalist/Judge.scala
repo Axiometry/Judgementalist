@@ -20,9 +20,9 @@ object Judge {
     object SubmitFailure {
       sealed trait Reason
       object Reason {
-        case class ParticipantNotFound(participantId: String) extends Reason
-        case class ProblemNotFound(problemId: String) extends Reason
-        case class ContestNotFound(contestId: String) extends Reason
+        case class ParticipantNotFound(id: String) extends Reason
+        case class ProblemNotFound(id: String) extends Reason
+        case class ContestNotFound(id: String) extends Reason
         case class UnsupportedExtension(extension: String) extends Reason
       }
     }
