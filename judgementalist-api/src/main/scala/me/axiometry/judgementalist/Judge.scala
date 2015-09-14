@@ -5,18 +5,21 @@ import akka.actor.Actor
 trait Judge extends Actor
 
 object Judge {
+  sealed trait Request
   object Requests {
     case class Submit(participantId: String,
                       problemId: String,
                       contestId: String = null,
                       source: String,
-                      extension: String)
+                      extension: String) extends Request
 
-    case object Languages
+    case object Languages extends Request
   }
+
+  sealed trait Response
   object Responses {
-    case class Submit(id: Long)
-    case class SubmitFailure(reason: SubmitFailure.Reason)
+    case class Submit(id: Long) extends Response
+    case class SubmitFailure(reason: SubmitFailure.Reason) extends Response
     object SubmitFailure {
       sealed trait Reason
       object Reason {
@@ -27,8 +30,8 @@ object Judge {
       }
     }
 
-    case class Languages(languages: Language*)
+    case class Languages(languages: Language*) extends Response
 
-    case class SubmissionStateChanged(id: Long)
+    case class SubmissionStateChanged(id: Long) extends Response
   }
 }
