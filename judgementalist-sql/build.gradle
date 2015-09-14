@@ -2,5 +2,7 @@ description = 'Judgementalist SQL Storage'
 version = '0.0.1'
 
 dependencies {
+	compile project(':judgementalist-api')
+	
 	compile('com.typesafe.slick:slick_2.11:3.0.3')
 }

@@ -1,2 +1,6 @@
 description = 'Judgementalist Judge'
 version = '0.0.1'
+
+dependencies {
+	compile project(':judgementalist-api')
+}
