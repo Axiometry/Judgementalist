@@ -7,8 +7,8 @@ trait Storage extends Actor
 
 object Storage {
   sealed trait Request
-  object Requests {
-    object Contests {
+  object Request {
+    object Contest {
       case class Get(id: String) extends Request
       case class List(sortBy: SortOrder = SortOrder.StartDate(),
                       offset: Int = 0,
@@ -33,7 +33,7 @@ object Storage {
       }
     }
 
-    object Participants {
+    object Participant {
       case class Get(id: String) extends Request
       case class List(sortBy: SortOrder = SortOrder.Name(),
                       offset: Int = 0,
@@ -58,7 +58,7 @@ object Storage {
       }
     }
 
-    object Problems {
+    object Problem {
       case class Get(id: String) extends Request
       case class GetCases(id: String, sampleOnly: Boolean = false) extends Request
       case class List(sortBy: SortOrder = SortOrder.Name(),
@@ -90,7 +90,7 @@ object Storage {
       }
     }
 
-    object Submissions {
+    object Submission {
       case class Get(id: Long) extends Request
       case class GetState(id: Long) extends Request
       case class List(participantId: String = null,
@@ -141,12 +141,14 @@ object Storage {
   }
 
   sealed trait Response
-  object Responses {
-    object Contests {
-      case class Get(contest: Contest) extends Response
+  object Response {
+    object Contest {
+      import me.axiometry.judgementalist.{ Contest => C }
+
+      case class Get(contest: C) extends Response
       case class GetNotFound(id: String) extends Response
-      case class List(contests: Seq[Contest]) extends Response
-      case class Create(contest: Contest) extends Response
+      case class List(contests: Seq[C]) extends Response
+      case class Create(contest: C) extends Response
       case class CreateFailure(reason: CreateFailure.Reason) extends Response
       object CreateFailure {
         sealed trait Reason
@@ -155,14 +157,15 @@ object Storage {
           case class InvalidProblems(problemIds: String*) extends Reason
         }
       }
-      case class AddParticipants(contest: Contest, participants: Participant*) extends Response
+      case class AddParticipants(contest: C, participants: Participant*) extends Response
       case class Delete(ids: String*) extends Response
     }
 
-    object Participants {
-      case class Get(participant: Participant) extends Response
+    object Participant {
+      import me.axiometry.judgementalist.{ Participant => P }
+      case class Get(participant: P) extends Response
       case class GetNotFound(id: String) extends Response
-      case class List(participants: Seq[Participant]) extends Response
+      case class List(participants: Seq[P]) extends Response
       case class CreateUser(user: User) extends Response
       case class CreateTeam(team: Team) extends Response
       case class CreateFailure(reason: CreateFailure.Reason) extends Response
@@ -173,7 +176,7 @@ object Storage {
           case class InvalidTeamMembers(memberIds: String*) extends Reason
         }
       }
-      case class Update(participant: Participant) extends Response
+      case class Update(participant: P) extends Response
       case class AddTeamMembers(team: Team, members: User*) extends Response
       case class RemoveTeamMembers(team: Team, members: User*) extends Response
       case class TeamMembersFailure(reason: TeamMembersFailure.Reason) extends Response
@@ -186,10 +189,12 @@ object Storage {
       case class Delete(ids: String*) extends Response
     }
 
-    object Problems {
-      case class Get(problem: Problem) extends Response
+    object Problem {
+      import me.axiometry.judgementalist.{ Problem => P }
+
+      case class Get(problem: P) extends Response
       case class GetNotFound(id: String) extends Response
-      case class GetCases(problem: Problem, cases: Seq[ProblemCase]) extends Response
+      case class GetCases(problem: P, cases: Seq[ProblemCase]) extends Response
       case class GetCasesFailure(reason: GetCasesFailure.Reason) extends Response
       object GetCasesFailure {
         sealed trait Reason
@@ -197,8 +202,8 @@ object Storage {
           case class InvalidProblem(id: String) extends Reason
         }
       }
-      case class List(problems: Seq[Problem]) extends Response
-      case class Create(problem: Problem) extends Response
+      case class List(problems: Seq[P]) extends Response
+      case class Create(problem: P) extends Response
       case class CreateFailure(reason: CreateFailure.Reason) extends Response
       object CreateFailure {
         sealed trait Reason
@@ -215,9 +220,9 @@ object Storage {
           case class ConflictingIndex(index: Int) extends Reason
         }
       }
-      case class Update(problem: Problem) extends Response
+      case class Update(problem: P) extends Response
       case class Delete(ids: String*) extends Response
-      case class DeleteCases(problem: Problem, indices: Int*) extends Response
+      case class DeleteCases(problem: P, indices: Int*) extends Response
       case class DeleteCasesFailure(reason: DeleteCasesFailure.Reason) extends Response
       object DeleteCasesFailure {
         sealed trait Reason
@@ -227,13 +232,15 @@ object Storage {
       }
     }
 
-    object Submissions {
-      case class Get(submission: Submission) extends Response
+    object Submission {
+      import me.axiometry.judgementalist.{ Submission => S }
+
+      case class Get(submission: S) extends Response
       case class GetNotFound(id: Long) extends Response
-      case class GetState(state: Submission.State) extends Response
+      case class GetState(state: S.State) extends Response
       case class GetStateNotFound(id: Long) extends Response
-      case class List(submissions: Seq[Submission]) extends Response
-      case class Create(submission: Submission) extends Response
+      case class List(submissions: Seq[S]) extends Response
+      case class Create(submission: S) extends Response
       case class CreateFailure(reason: CreateFailure.Reason) extends Response
       object CreateFailure {
         sealed trait Reason
