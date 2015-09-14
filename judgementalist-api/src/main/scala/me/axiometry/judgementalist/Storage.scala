@@ -9,8 +9,7 @@ object Storage {
   object Requests {
     object Contests {
       case class Get(id: String)
-      case class List(sortBy: SortOrder = SortOrder.StartDate,
-                      ascending: Boolean = false,
+      case class List(sortBy: SortOrder = SortOrder.StartDate(),
                       offset: Int = 0,
                       count: Int = -1)
       case class Create(id: String,
@@ -21,19 +20,21 @@ object Storage {
       case class AddParticipants(id: String, participantIds: String*)
       case class Delete(ids: String*)
 
-      sealed trait SortOrder
+      sealed trait SortOrder {
+        def ascending: Boolean
+        def andThen: Option[SortOrder]
+      }
       object SortOrder {
-        case object Id extends SortOrder
-        case object Name extends SortOrder
-        case object StartDate extends SortOrder
-        case object EndDate extends SortOrder
+        case class Id(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Name(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class StartDate(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class EndDate(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
       }
     }
 
     object Participants {
       case class Get(id: String)
-      case class List(sortBy: SortOrder = SortOrder.Name,
-                      ascending: Boolean = false,
+      case class List(sortBy: SortOrder = SortOrder.Name(),
                       offset: Int = 0,
                       count: Int = -1)
       case class CreateUser(id: String,
@@ -46,18 +47,20 @@ object Storage {
       case class RemoveTeamMembers(id: String, memberIds: String*)
       case class Delete(ids: String*)
 
-      sealed trait SortOrder
+      sealed trait SortOrder {
+        def ascending: Boolean
+        def andThen: Option[SortOrder]
+      }
       object SortOrder {
-        case object Id extends SortOrder
-        case object Name extends SortOrder
+        case class Id(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Name(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
       }
     }
 
     object Problems {
       case class Get(id: String)
       case class GetCases(id: String, sampleOnly: Boolean = false)
-      case class List(sortBy: SortOrder = SortOrder.Name,
-                      ascending: Boolean = false,
+      case class List(sortBy: SortOrder = SortOrder.Name(),
                       offset: Int = 0,
                       count: Int = -1)
       case class Create(id: String,
@@ -69,16 +72,54 @@ object Storage {
                          output: String,
                          timeLimit: Option[Long],
                          memoryLimit: Option[Long])
-      case class Update(id: String, name: String = null, statement: String = null)
+      case class Update(id: String,
+                        name: String = null,
+                        statement: String = null)
       case class Delete(ids: String*)
       case class DeleteCases(id: String, indices: Int*)
 
-      sealed trait SortOrder
+      sealed trait SortOrder {
+        def ascending: Boolean
+        def andThen: Option[SortOrder]
+      }
       object SortOrder {
-        case object Id extends SortOrder
-        case object Name extends SortOrder
-        case object Difficulty extends SortOrder
+        case class Id(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Name(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Difficulty(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+      }
+    }
 
+    object Submissions {
+      case class Get(id: Long)
+      case class GetState(id: Long)
+      case class List(participantId: String = null,
+                      problemId: String = null,
+                      contestId: String = null,
+                      sortBy: SortOrder = SortOrder.Date(),
+                      offset: Int = 0,
+                      count: Int = -1)
+      case class Create(participantId: String,
+                        problemId: String,
+                        contestId: String = null,
+                        source: String,
+                        extension: String,
+                        languageId: String)
+      case class SetStateWaiting(id: Long)
+      case class SetStateJudging(id: Long)
+      case class SetStateCorrect(id: Long)
+      case class SetStateIncorrect(id: Long, reason: String, output: Map[Int, String], diff: Map[Int, String])
+      case class Delete(ids: Long*)
+
+      sealed trait SortOrder {
+        def ascending: Boolean
+        def andThen: Option[SortOrder]
+      }
+      object SortOrder {
+        case class Id(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Date(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Problem(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Contest(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
+        case class Participant(ascending: Boolean = false, andThen: Option[SortOrder] = None) extends SortOrder
       }
     }
 
@@ -114,6 +155,7 @@ object Storage {
       case class AddParticipants(contest: Contest, participants: Participant*)
       case class Delete(ids: String*)
     }
+
     object Participants {
       case class Get(participant: Participant)
       case class GetNotFound(id: String)
@@ -140,6 +182,7 @@ object Storage {
       }
       case class Delete(ids: String*)
     }
+
     object Problems {
       case class Get(problem: Problem)
       case class GetNotFound(id: String)
@@ -179,6 +222,34 @@ object Storage {
           case class InvalidProblem(id: String) extends Reason
         }
       }
+    }
+
+    object Submissions {
+      case class Get(submission: Submission)
+      case class GetNotFound(id: Long)
+      case class GetState(state: Submission.State)
+      case class GetStateNotFound(id: Long)
+      case class List(submissions: Seq[Submission])
+      case class Create(submission: Submission)
+      case class CreateFailure(reason: CreateFailure.Reason)
+      object CreateFailure {
+        sealed trait Reason
+        object Reason {
+          case class InvalidParticipant(id: String) extends Reason
+          case class InvalidProblem(id: String) extends Reason
+          case class InvalidContest(id: String) extends Reason
+          case class InvalidLanguage(id: String) extends Reason
+        }
+      }
+      case class SetState(id: Long)
+      case class SetStateFailure(reason: SetStateFailure.Reason)
+      object SetStateFailure {
+        sealed trait Reason
+        object Reason {
+          case class InvalidSubmission(id: Long) extends Reason
+        }
+      }
+      case class Delete(ids: Long*)
     }
 
     case class Search(query: String,
